@@ -11,7 +11,7 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { createProductDto } from './dto/createProduct.dto';
 import { UpdateProductDto } from './dto/updateProduct.dto';
@@ -20,6 +20,7 @@ import { UpdateProductDto } from './dto/updateProduct.dto';
 @Controller('products')
 export class ProductController {
   constructor(private productService: ProductService) {}
+
   @Get()
   @ApiResponse({ status: 200, description: 'Return the all the products' })
   getAllProducts() {
