@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { getModelToken } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
 
 describe('AuthSrvice', () => {
   let service: AuthService;
@@ -60,5 +61,43 @@ describe('AuthSrvice', () => {
     });
   });
 
-  it('should return jwt token Login', async () => {});
+  it('should return jwt token Login', async () => {
+    jest
+      .spyOn(bcrypt, 'compare')
+      .mockImplementation(() => Promise.resolve(true));
+    expect(await bcrypt.compare('password', 'hashedpassword')).toEqual(true);
+    expect(await mockUserModel.findOne('email')).toEqual({
+      _id: 'userId',
+      name: 'name',
+      password: '12345678',
+      username: 'usename',
+      email: 'email',
+      __v: 0,
+    });
+
+    expect(
+      await mockJwtSerivce.signAsync({ email: 'email', userId: 'userid' }),
+    ).toEqual('jwt token');
+
+    let res = await service.login({ email: 'email', password: 'password' });
+
+    expect(res).toEqual({
+      status: 'success',
+      token: 'jwt token',
+    });
+  });
+
+  it('should return fail status and message if user not found', async () => {
+    mockUserModel.findOne.mockResolvedValue(null);
+
+    const result = await service.login({
+      email: 'nonexistent@example.com',
+      password: 'password',
+    });
+
+    expect(result).toEqual({
+      status: 'fail',
+      message: 'User not exist',
+    });
+  });
 });

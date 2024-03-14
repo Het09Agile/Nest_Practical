@@ -41,19 +41,26 @@ export class AuthService {
     try {
       let user = await this.userModel.findOne({ email: data.email });
 
-      if (user && (await bcrypt.compare(data.password, user.password))) {
-        // JWT Token generation
-        let payload = { email: user.email, userId: user._id };
-        let token = await this.jwtService.signAsync(payload);
+      if (!user) {
+        // user not found
         return {
-          status: 'success',
-          token,
+          status: 'fail',
+          message: 'User not exist',
         };
       }
-
+      if (!(await bcrypt.compare(data.password, user.password))) {
+        // Password not matched
+        return {
+          status: 'fail',
+          message: 'incorrect password',
+        };
+      }
+      // JWT Token generation
+      let payload = { email: user.email, userId: user._id };
+      let token = await this.jwtService.signAsync(payload);
       return {
-        status: 'fail',
-        message: 'Incorrect email or Passwword',
+        status: 'success',
+        token,
       };
     } catch (err) {
       return {

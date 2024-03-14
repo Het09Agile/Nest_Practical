@@ -46,9 +46,7 @@ export class ProductService {
       let product = await this.productModel.findById(prodId);
       if (product && product.owner.toString() === userId) {
         await this.productModel.findByIdAndDelete(prodId);
-        return {
-          status: 'success',
-        };
+        return;
       }
       return {
         status: 'fail',
@@ -69,7 +67,7 @@ export class ProductService {
   ) {
     try {
       let product = await this.productModel.findById(prodId);
-      if (product && product.owner.toString() === userId) {
+      if (product.owner.toString() === userId) {
         let updatedProduct = await this.productModel.findByIdAndUpdate(
           prodId,
           prodData,
